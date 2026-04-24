@@ -1,0 +1,114 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import AgentStatusBoard from '@/components/command/AgentStatusBoard';
+import AgentOrgChart from '@/components/command/AgentOrgChart';
+import ActivityLog from '@/components/command/ActivityLog';
+import RoadmapTracker from '@/components/command/RoadmapTracker';
+
+type TabId = 'topology' | 'agents' | 'activity' | 'roadmap';
+
+export default function CommandCenter() {
+  const [activeTab, setActiveTab] = useState<TabId>('topology');
+  const [phase, setPhase] = useState(0);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const hasAccess = sessionStorage.getItem('captains-key');
+    if (!hasAccess) {
+      sessionStorage.setItem('captains-key', 'true');
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setPhase(1), 200);
+    const t2 = setTimeout(() => setPhase(2), 600);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  const tabs: { id: TabId; label: string }[] = [
+    { id: 'topology', label: 'Topology' },
+    { id: 'agents', label: 'Agents' },
+    { id: 'activity', label: 'Activity' },
+    { id: 'roadmap', label: 'Roadmap' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header
+        className="border-b border-border px-6 md:px-10 py-4 flex items-center justify-between transition-all duration-700"
+        style={{ opacity: phase >= 1 ? 1 : 0 }}
+      >
+        <div className="flex items-center gap-6">
+          <button
+            onClick={() => navigate('/')}
+            className="text-[10px] tracking-[0.3em] uppercase text-muted-foreground hover:text-foreground transition-colors"
+            style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          >
+            ← Manifesto
+          </button>
+          <div className="w-px h-4 bg-border" />
+          <h1
+            className="text-lg font-normal tracking-[-0.01em]"
+            style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
+          >
+            Command Center
+          </h1>
+        </div>
+        <div className="flex items-center gap-3">
+          <span
+            className="w-2 h-2 rounded-full animate-pulse"
+            style={{ background: 'hsl(160 40% 45%)' }}
+          />
+          <span
+            className="text-[10px] tracking-[0.2em] uppercase"
+            style={{ fontFamily: "'JetBrains Mono', monospace", color: 'hsl(160 30% 45%)' }}
+          >
+            Systems Online
+          </span>
+        </div>
+      </header>
+
+      {/* Tab navigation */}
+      <nav
+        className="border-b border-border px-6 md:px-10 flex gap-0 transition-all duration-700"
+        style={{ opacity: phase >= 1 ? 1 : 0 }}
+      >
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className="relative px-5 py-3 text-sm transition-colors duration-300"
+            style={{
+              fontFamily: "'Instrument Sans', sans-serif",
+              color: activeTab === tab.id ? 'hsl(40 10% 82%)' : 'hsl(40 4% 35%)',
+            }}
+          >
+            {tab.label}
+            {activeTab === tab.id && (
+              <div
+                className="absolute bottom-0 left-0 right-0 h-px"
+                style={{ background: 'hsl(25 30% 45%)' }}
+              />
+            )}
+          </button>
+        ))}
+      </nav>
+
+      {/* Content */}
+      <div
+        className="px-6 md:px-10 py-8 transition-all duration-700"
+        style={{
+          opacity: phase >= 2 ? 1 : 0,
+          transform: phase >= 2 ? 'translateY(0)' : 'translateY(12px)',
+        }}
+      >
+        {activeTab === 'topology' && <AgentOrgChart />}
+        {activeTab === 'agents' && <AgentStatusBoard />}
+        {activeTab === 'activity' && <ActivityLog />}
+        {activeTab === 'roadmap' && <RoadmapTracker />}
+      </div>
+    </div>
+  );
+}

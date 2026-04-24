@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 3%;
+    --foreground: 40 10% 82%;
+
+    --card: 0 0% 5.5%;
+    --card-foreground: 40 10% 82%;
+
+    --popover: 0 0% 5.5%;
+    --popover-foreground: 40 10% 82%;
+
+    --primary: 40 12% 62%;
+    --primary-foreground: 0 0% 3%;
+
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 40 6% 60%;
+
+    --muted: 0 0% 10%;
+    --muted-foreground: 40 4% 40%;
+
+    --accent: 25 30% 45%;
+    --accent-foreground: 40 10% 90%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 0 0% 12%;
+    --input: 0 0% 12%;
+    --ring: 40 12% 62%;
+
+    --radius: 0.375rem;
+
+    --sidebar-background: 0 0% 3%;
+    --sidebar-foreground: 40 10% 82%;
+    --sidebar-primary: 40 12% 62%;
+    --sidebar-primary-foreground: 0 0% 3%;
+    --sidebar-accent: 0 0% 8%;
+    --sidebar-accent-foreground: 40 6% 60%;
+    --sidebar-border: 0 0% 12%;
+    --sidebar-ring: 40 12% 62%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background: hsl(25 30% 45% / 0.3);
+  color: hsl(40 10% 90%);
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(0 0% 15%);
+  border-radius: 2px;
+}
