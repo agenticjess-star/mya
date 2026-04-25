@@ -78,7 +78,7 @@ export default function AgentDetailModal({ agent, onClose, onUpdate }: Props) {
         }}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 px-8 pt-8 pb-6 border-b border-border" style={{ background: 'hsl(0 0% 5% / 0.95)', backdropFilter: 'blur(12px)' }}>
+        <div className="sticky top-0 z-10 px-5 sm:px-8 pt-6 sm:pt-8 pb-6 border-b border-border" style={{ background: 'hsl(0 0% 5% / 0.95)', backdropFilter: 'blur(12px)' }}>
           <div className="flex items-center justify-between mb-6">
             <button
               onClick={onClose}
@@ -132,7 +132,7 @@ export default function AgentDetailModal({ agent, onClose, onUpdate }: Props) {
           </div>
         </div>
 
-        <div className="px-8 py-6 space-y-8">
+        <div className="px-5 sm:px-8 py-6 space-y-8">
           {/* Stats row */}
           <div className="grid grid-cols-3 gap-4">
             <StatCard label="Uptime" value={`${agent.uptime_hours}h`} />

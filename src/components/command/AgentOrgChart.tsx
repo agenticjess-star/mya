@@ -69,9 +69,12 @@ function getPositions(count: number, width: number, height: number) {
   if (count === 0) return positions;
 
   const centerX = width / 2;
-  const topY = 80;
-  const midY = height * 0.45;
-  const bottomY = height * 0.75;
+  const isNarrow = width < 600;
+  const topY = isNarrow ? 70 : 80;
+  const midY = height * (isNarrow ? 0.38 : 0.45);
+  const bottomY = height * (isNarrow ? 0.7 : 0.75);
+  const maxSpacing = isNarrow ? 110 : 220;
+  const sidePadding = isNarrow ? 60 : 120;
 
   // First agent (orchestrator) at top
   positions.push({ x: centerX, y: topY });
@@ -80,7 +83,7 @@ function getPositions(count: number, width: number, height: number) {
   const remaining = count - 1;
   if (remaining <= 3) {
     // Single row below
-    const spacing = Math.min(220, (width - 120) / Math.max(remaining, 1));
+    const spacing = Math.min(maxSpacing, (width - sidePadding) / Math.max(remaining, 1));
     const startX = centerX - (spacing * (remaining - 1)) / 2;
     for (let i = 0; i < remaining; i++) {
       positions.push({ x: startX + i * spacing, y: midY });
@@ -90,13 +93,13 @@ function getPositions(count: number, width: number, height: number) {
     const topRow = Math.ceil(remaining / 2);
     const bottomRow = remaining - topRow;
 
-    const spacing1 = Math.min(220, (width - 120) / Math.max(topRow, 1));
+    const spacing1 = Math.min(maxSpacing, (width - sidePadding) / Math.max(topRow, 1));
     const startX1 = centerX - (spacing1 * (topRow - 1)) / 2;
     for (let i = 0; i < topRow; i++) {
       positions.push({ x: startX1 + i * spacing1, y: midY });
     }
 
-    const spacing2 = Math.min(220, (width - 120) / Math.max(bottomRow, 1));
+    const spacing2 = Math.min(maxSpacing, (width - sidePadding) / Math.max(bottomRow, 1));
     const startX2 = centerX - (spacing2 * (bottomRow - 1)) / 2;
     for (let i = 0; i < bottomRow; i++) {
       positions.push({ x: startX2 + i * spacing2, y: bottomY });
@@ -190,8 +193,8 @@ export default function AgentOrgChart() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div className="min-w-0">
           <h2
             className="text-xl font-normal tracking-[-0.01em]"
             style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
@@ -202,7 +205,7 @@ export default function AgentOrgChart() {
             Click any agent to view details & edit instructions
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center flex-wrap gap-x-3 gap-y-2">
           {Object.entries(typeConfig).map(([type, cfg]) => (
             <div key={type} className="flex items-center gap-1.5">
               <span className="text-xs" style={{ color: cfg.color }}>{cfg.icon}</span>
@@ -221,7 +224,7 @@ export default function AgentOrgChart() {
         ref={containerRef}
         className="relative w-full rounded border border-border overflow-hidden"
         style={{
-          height: '560px',
+          height: dimensions.width < 600 ? '640px' : '560px',
           background: 'linear-gradient(180deg, hsl(0 0% 4%) 0%, hsl(0 0% 3%) 100%)',
         }}
       >
@@ -272,7 +275,8 @@ export default function AgentOrgChart() {
           const cfg = typeConfig[agent.type] || typeConfig.executor;
           const isHovered = hoveredAgent === agent.id;
           const isOrchestrator = agent.type === 'orchestrator';
-          const nodeSize = isOrchestrator ? 72 : 56;
+          const isNarrow = dimensions.width < 600;
+          const nodeSize = isOrchestrator ? (isNarrow ? 56 : 72) : (isNarrow ? 44 : 56);
 
           return (
             <button
