@@ -190,8 +190,8 @@ export default function AgentOrgChart() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div className="min-w-0">
           <h2
             className="text-xl font-normal tracking-[-0.01em]"
             style={{ fontFamily: "'EB Garamond', Georgia, serif" }}
@@ -202,7 +202,7 @@ export default function AgentOrgChart() {
             Click any agent to view details & edit instructions
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center flex-wrap gap-x-3 gap-y-2">
           {Object.entries(typeConfig).map(([type, cfg]) => (
             <div key={type} className="flex items-center gap-1.5">
               <span className="text-xs" style={{ color: cfg.color }}>{cfg.icon}</span>
@@ -221,7 +221,7 @@ export default function AgentOrgChart() {
         ref={containerRef}
         className="relative w-full rounded border border-border overflow-hidden"
         style={{
-          height: '560px',
+          height: dimensions.width < 600 ? '640px' : '560px',
           background: 'linear-gradient(180deg, hsl(0 0% 4%) 0%, hsl(0 0% 3%) 100%)',
         }}
       >
