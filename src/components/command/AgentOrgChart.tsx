@@ -69,9 +69,12 @@ function getPositions(count: number, width: number, height: number) {
   if (count === 0) return positions;
 
   const centerX = width / 2;
-  const topY = 80;
-  const midY = height * 0.45;
-  const bottomY = height * 0.75;
+  const isNarrow = width < 600;
+  const topY = isNarrow ? 70 : 80;
+  const midY = height * (isNarrow ? 0.38 : 0.45);
+  const bottomY = height * (isNarrow ? 0.7 : 0.75);
+  const maxSpacing = isNarrow ? 110 : 220;
+  const sidePadding = isNarrow ? 60 : 120;
 
   // First agent (orchestrator) at top
   positions.push({ x: centerX, y: topY });
@@ -80,7 +83,7 @@ function getPositions(count: number, width: number, height: number) {
   const remaining = count - 1;
   if (remaining <= 3) {
     // Single row below
-    const spacing = Math.min(220, (width - 120) / Math.max(remaining, 1));
+    const spacing = Math.min(maxSpacing, (width - sidePadding) / Math.max(remaining, 1));
     const startX = centerX - (spacing * (remaining - 1)) / 2;
     for (let i = 0; i < remaining; i++) {
       positions.push({ x: startX + i * spacing, y: midY });
@@ -90,13 +93,13 @@ function getPositions(count: number, width: number, height: number) {
     const topRow = Math.ceil(remaining / 2);
     const bottomRow = remaining - topRow;
 
-    const spacing1 = Math.min(220, (width - 120) / Math.max(topRow, 1));
+    const spacing1 = Math.min(maxSpacing, (width - sidePadding) / Math.max(topRow, 1));
     const startX1 = centerX - (spacing1 * (topRow - 1)) / 2;
     for (let i = 0; i < topRow; i++) {
       positions.push({ x: startX1 + i * spacing1, y: midY });
     }
 
-    const spacing2 = Math.min(220, (width - 120) / Math.max(bottomRow, 1));
+    const spacing2 = Math.min(maxSpacing, (width - sidePadding) / Math.max(bottomRow, 1));
     const startX2 = centerX - (spacing2 * (bottomRow - 1)) / 2;
     for (let i = 0; i < bottomRow; i++) {
       positions.push({ x: startX2 + i * spacing2, y: bottomY });
