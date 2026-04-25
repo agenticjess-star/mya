@@ -275,7 +275,8 @@ export default function AgentOrgChart() {
           const cfg = typeConfig[agent.type] || typeConfig.executor;
           const isHovered = hoveredAgent === agent.id;
           const isOrchestrator = agent.type === 'orchestrator';
-          const nodeSize = isOrchestrator ? 72 : 56;
+          const isNarrow = dimensions.width < 600;
+          const nodeSize = isOrchestrator ? (isNarrow ? 56 : 72) : (isNarrow ? 44 : 56);
 
           return (
             <button
