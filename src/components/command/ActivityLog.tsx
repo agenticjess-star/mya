@@ -103,11 +103,11 @@ export default function ActivityLog() {
           return (
             <div
               key={log.id}
-              className="flex items-start gap-4 py-3 border-b border-border/50 group hover:bg-card/30 transition-colors px-2 -mx-2 rounded"
+              className="flex items-start gap-2 sm:gap-4 py-3 border-b border-border/50 group hover:bg-card/30 transition-colors px-2 -mx-2 rounded"
             >
               {/* Time */}
               <span
-                className="text-[10px] tracking-[0.05em] shrink-0 pt-0.5"
+                className="text-[10px] tracking-[0.05em] shrink-0 pt-0.5 hidden sm:inline"
                 style={{
                   fontFamily: "'JetBrains Mono', monospace",
                   color: 'hsl(0 0% 22%)',
@@ -127,9 +127,9 @@ export default function ActivityLog() {
 
               {/* Content */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-3">
+                <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
                   <span
-                    className="text-[10px] tracking-[0.15em] uppercase font-medium shrink-0"
+                    className="text-[10px] tracking-[0.15em] uppercase font-medium"
                     style={{
                       fontFamily: "'JetBrains Mono', monospace",
                       color: es.color,
@@ -143,8 +143,14 @@ export default function ActivityLog() {
                   >
                     {log.event_type.replace(/_/g, ' ')}
                   </span>
+                  <span
+                    className="sm:hidden text-[9px] tracking-[0.05em] text-muted-foreground/40 ml-auto"
+                    style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    {timeStr}
+                  </span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed truncate">
+                <p className="text-sm text-muted-foreground mt-0.5 leading-relaxed break-words">
                   {log.message}
                 </p>
               </div>
