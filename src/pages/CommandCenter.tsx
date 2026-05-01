@@ -5,8 +5,9 @@ import AgentStatusBoard from '@/components/command/AgentStatusBoard';
 import AgentOrgChart from '@/components/command/AgentOrgChart';
 import ActivityLog from '@/components/command/ActivityLog';
 import RoadmapTracker from '@/components/command/RoadmapTracker';
+import ProtocolDoctrine from '@/components/command/ProtocolDoctrine';
 
-type TabId = 'topology' | 'agents' | 'activity' | 'roadmap';
+type TabId = 'topology' | 'agents' | 'activity' | 'roadmap' | 'protocol';
 
 export default function CommandCenter() {
   const [activeTab, setActiveTab] = useState<TabId>('topology');
@@ -31,6 +32,7 @@ export default function CommandCenter() {
     { id: 'agents', label: 'Agents' },
     { id: 'activity', label: 'Activity' },
     { id: 'roadmap', label: 'Roadmap' },
+    { id: 'protocol', label: 'Protocol' },
   ];
 
   return (
@@ -114,6 +116,7 @@ export default function CommandCenter() {
         {activeTab === 'agents' && <AgentStatusBoard />}
         {activeTab === 'activity' && <ActivityLog />}
         {activeTab === 'roadmap' && <RoadmapTracker />}
+        {activeTab === 'protocol' && <ProtocolDoctrine />}
       </div>
     </div>
   );
