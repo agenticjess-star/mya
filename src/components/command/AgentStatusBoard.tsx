@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import AddAgentDialog from './AddAgentDialog';
 
 interface Agent {
   id: string;
@@ -33,15 +34,14 @@ const typeIcons: Record<string, string> = {
 export default function AgentStatusBoard() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
 
-  useEffect(() => {
-    const fetchAgents = async () => {
-      const { data } = await supabase.from('agents').select('*').order('name');
-      if (data) setAgents(data as Agent[]);
-      setLoading(false);
-    };
-    fetchAgents();
-  }, []);
+  const fetchAgents = async () => {
+    const { data } = await supabase.from('agents').select('*').order('name');
+    if (data) setAgents(data as Agent[]);
+    setLoading(false);
+  };
+  useEffect(() => { fetchAgents(); }, []);
 
   if (loading) {
     return (
@@ -67,6 +67,13 @@ export default function AgentStatusBoard() {
             {agents.filter(a => a.status === 'active').length} of {agents.length} active
           </p>
         </div>
+        <button
+          onClick={() => setShowAdd(true)}
+          className="text-[10px] tracking-[0.2em] uppercase px-4 py-2 border rounded transition-all"
+          style={{ fontFamily: "'JetBrains Mono', monospace", borderColor: 'hsl(25 30% 35%)', color: 'hsl(25 50% 65%)' }}
+        >
+          + Add Agent
+        </button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -145,6 +152,7 @@ export default function AgentStatusBoard() {
           );
         })}
       </div>
+      <AddAgentDialog open={showAdd} onClose={() => setShowAdd(false)} onCreated={fetchAgents} />
     </div>
   );
 }
