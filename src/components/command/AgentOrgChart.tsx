@@ -89,8 +89,9 @@ function getPositions(agents: Agent[], width: number, height: number) {
   const cx = width / 2;
   const cy = height / 2;
   const isNarrow = width < 600;
-  const outerR = Math.min(width, height) * (isNarrow ? 0.36 : 0.34);
-  const innerR = Math.min(width, height) * (isNarrow ? 0.18 : 0.16);
+  // Tighter ring on mobile so node labels don't clip off the right/left edges
+  const outerR = Math.min(width, height) * (isNarrow ? 0.28 : 0.34);
+  const innerR = Math.min(width, height) * (isNarrow ? 0.14 : 0.16);
 
   // Orchestrator at center, Ralph on inner orbit, rest on outer ring
   const outerAgents: number[] = [];
