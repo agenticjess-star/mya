@@ -144,20 +144,67 @@ Deno.serve(async (req) => {
 
           send({ type: "routed", assignments });
 
-          // Step 2: dispatch in parallel
+          // Step 2: dispatch in parallel.
+          // If the specialist has a real webhook (Hyperagent), enqueue via the rate-limited
+          // queue and call its webhook directly here for an immediate reply. Otherwise fall
+          // back to a direct AI call. Either way we mirror to agent_messages so the
+          // topology drill-in shows the conversation.
+          const conversationId = crypto.randomUUID();
           const results = await Promise.all(
             assignments.map(async (a) => {
-              const agent = specialists.find((s) => s.name === a.agent_name);
+              const agent = (await supabase.from("agents").select("*").eq("name", a.agent_name).maybeSingle()).data;
               if (!agent) return null;
               send({ type: "dispatch", agent: agent.name, subtask: a.subtask });
-              await log(agent, "task_routed", a.subtask);
+              await log(agent as Agent, "task_routed", a.subtask);
 
-              const out = await callModel(agent.model || "openai/gpt-5-mini", [
-                { role: "system", content: agent.system_instructions || "" },
-                { role: "user", content: a.subtask },
-              ]);
-              const content = out.choices?.[0]?.message?.content || "";
-              await log(agent, "task_complete", `Returned ${content.length} chars`);
+              // Mirror outbound message
+              const { data: outMsg } = await supabase.from("agent_messages").insert({
+                conversation_id: conversationId,
+                from_kind: "orchestrator", from_agent_id: cos.id, from_label: "Chief of Staff",
+                to_kind: "agent", to_agent_id: agent.id, to_label: agent.name,
+                channel: agent.webhook_url ? "webhook" : "orchestrator",
+                content: a.subtask,
+              }).select("id").single();
+
+              let content = "";
+              try {
+                if (agent.webhook_url) {
+                  const { data: cred } = await supabase
+                    .from("agent_credentials").select("webhook_secret").eq("agent_id", agent.id).maybeSingle();
+                  const headers: Record<string, string> = { "Content-Type": "application/json" };
+                  if (cred?.webhook_secret) headers["X-Hyperagent-Webhook-Secret"] = cred.webhook_secret;
+                  const r = await fetch(agent.webhook_url, {
+                    method: "POST", headers,
+                    body: JSON.stringify({
+                      prompt: a.subtask, agent_id: agent.id, agent_name: agent.name,
+                      conversation_id: conversationId, source: "orchestrator",
+                    }),
+                  });
+                  const text = await r.text();
+                  if (!r.ok) throw new Error(`webhook ${r.status}`);
+                  try {
+                    const j = JSON.parse(text);
+                    content = j.reply || j.message || j.text || j.content || j.output || text;
+                  } catch { content = text; }
+                } else {
+                  const out = await callModel(agent.model || "openai/gpt-5-mini", [
+                    { role: "system", content: agent.system_instructions || "" },
+                    { role: "user", content: a.subtask },
+                  ]);
+                  content = out.choices?.[0]?.message?.content || "";
+                }
+              } catch (err) {
+                content = `[error: ${(err as Error).message}]`;
+              }
+
+              await supabase.from("agent_messages").insert({
+                conversation_id: conversationId,
+                from_kind: "agent", from_agent_id: agent.id, from_label: agent.name,
+                to_kind: "orchestrator", to_agent_id: cos.id, to_label: "Chief of Staff",
+                channel: agent.webhook_url ? "webhook" : "orchestrator",
+                content, parent_message_id: outMsg?.id || null,
+              });
+              await log(agent as Agent, "task_complete", `Returned ${content.length} chars`);
               send({ type: "result", agent: agent.name, content });
               return { agent: agent.name, content };
             }),
