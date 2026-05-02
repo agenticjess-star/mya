@@ -219,3 +219,50 @@ src/
   <em>Sovereign Architecture · 2026</em><br/>
   <sub>The fork is psychological, not technical.</sub>
 </p>
+
+---
+
+## Agent Command Center — Operations
+
+The `/command` route is a live control plane for orchestrating Hyperagent agents over webhooks and Telegram, with rate limits, a queue, and full UI mirroring.
+
+### Add an agent
+**Agents tab → "+ Add Agent"**. Fields:
+- **Name / role / description**
+- **Webhook URL + secret** — your Hyperagent webhook (`X-Hyperagent-Webhook-Secret`)
+- **Telegram bot token** (optional) — DMs to that bot route to this agent
+- **Daily message cap** (default **3**) and **min seconds between messages** (default **60**)
+
+Credentials live in `agent_credentials` (service-role only). Agent metadata lives in `agents`.
+
+### Messaging flows
+| You do… | What happens |
+|---|---|
+| Type a directive in topology **Live** mode | Chief of Staff (`orchestrate`) decomposes via tool-calling, fans out to specialists' webhooks, mirrors every leg to `agent_messages`, streams back to UI |
+| Send from an agent's detail panel | Enqueued via `enqueue-message` → `queue-processor` posts to webhook → reply mirrored to UI |
+| DM an agent's Telegram bot | `telegram-poll` cron picks it up → enqueues → webhook reply → bot replies on Telegram + mirror to UI |
+
+### Rate limiting
+Every outbound call goes through `message_queue`. The processor enforces:
+- **Daily cap** per agent (default 3) — extra messages get `status='rate_limited'`, scheduled for tomorrow
+- **Min delay** since last sent (default 60s) — schedules the message for the earliest legal time
+- Both editable per agent in the detail panel
+
+### Background jobs (pg_cron, every minute)
+- `telegram-poll` — pulls new Telegram DMs for every agent with Telegram enabled
+- `queue-processor` — drains up to 10 ready queue items per tick
+
+### Edge functions
+| Function | Purpose |
+|---|---|
+| `register-agent` | Create/update agent + credentials |
+| `enqueue-message` | Rate-limit-aware enqueue |
+| `queue-processor` | Drain queue → call webhooks → mirror replies |
+| `telegram-poll` | Pull DMs per agent bot |
+| `orchestrate` | Chief-of-Staff routing & synthesis (SSE) |
+
+### Drill-in
+Click any agent → **View history** opens `ConversationViewer` with the full Telegram + webhook + orchestrator transcript, live via Realtime.
+
+### Tables
+`agents`, `agent_credentials`, `agent_messages`, `message_queue`, `telegram_bot_state`, `activity_logs`.
