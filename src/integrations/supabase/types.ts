@@ -52,14 +52,117 @@ export type Database = {
           },
         ]
       }
+      agent_credentials: {
+        Row: {
+          agent_id: string
+          telegram_bot_token: string | null
+          updated_at: string
+          webhook_secret: string | null
+        }
+        Insert: {
+          agent_id: string
+          telegram_bot_token?: string | null
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Update: {
+          agent_id?: string
+          telegram_bot_token?: string | null
+          updated_at?: string
+          webhook_secret?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_credentials_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_messages: {
+        Row: {
+          channel: string
+          content: string
+          conversation_id: string
+          created_at: string
+          from_agent_id: string | null
+          from_kind: string
+          from_label: string | null
+          id: string
+          metadata: Json
+          parent_message_id: string | null
+          to_agent_id: string | null
+          to_kind: string
+          to_label: string | null
+        }
+        Insert: {
+          channel: string
+          content: string
+          conversation_id?: string
+          created_at?: string
+          from_agent_id?: string | null
+          from_kind: string
+          from_label?: string | null
+          id?: string
+          metadata?: Json
+          parent_message_id?: string | null
+          to_agent_id?: string | null
+          to_kind: string
+          to_label?: string | null
+        }
+        Update: {
+          channel?: string
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          from_agent_id?: string | null
+          from_kind?: string
+          from_label?: string | null
+          id?: string
+          metadata?: Json
+          parent_message_id?: string | null
+          to_agent_id?: string | null
+          to_kind?: string
+          to_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_messages_from_agent_id_fkey"
+            columns: ["from_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "agent_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_messages_to_agent_id_fkey"
+            columns: ["to_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agents: {
         Row: {
           avatar_url: string | null
           connections: string[] | null
           created_at: string
           current_task: string | null
+          daily_message_limit: number
+          description: string | null
           id: string
+          is_user_added: boolean
           last_heartbeat: string | null
+          min_seconds_between_messages: number
           model: string | null
           name: string
           reports_to: string | null
@@ -67,16 +170,24 @@ export type Database = {
           success_rate: number | null
           system_instructions: string | null
           tasks_completed: number | null
+          telegram_chat_id: string | null
+          telegram_enabled: boolean
           type: string
           uptime_hours: number | null
+          webhook_enabled: boolean
+          webhook_url: string | null
         }
         Insert: {
           avatar_url?: string | null
           connections?: string[] | null
           created_at?: string
           current_task?: string | null
+          daily_message_limit?: number
+          description?: string | null
           id?: string
+          is_user_added?: boolean
           last_heartbeat?: string | null
+          min_seconds_between_messages?: number
           model?: string | null
           name: string
           reports_to?: string | null
@@ -84,16 +195,24 @@ export type Database = {
           success_rate?: number | null
           system_instructions?: string | null
           tasks_completed?: number | null
+          telegram_chat_id?: string | null
+          telegram_enabled?: boolean
           type?: string
           uptime_hours?: number | null
+          webhook_enabled?: boolean
+          webhook_url?: string | null
         }
         Update: {
           avatar_url?: string | null
           connections?: string[] | null
           created_at?: string
           current_task?: string | null
+          daily_message_limit?: number
+          description?: string | null
           id?: string
+          is_user_added?: boolean
           last_heartbeat?: string | null
+          min_seconds_between_messages?: number
           model?: string | null
           name?: string
           reports_to?: string | null
@@ -101,10 +220,90 @@ export type Database = {
           success_rate?: number | null
           system_instructions?: string | null
           tasks_completed?: number | null
+          telegram_chat_id?: string | null
+          telegram_enabled?: boolean
           type?: string
           uptime_hours?: number | null
+          webhook_enabled?: boolean
+          webhook_url?: string | null
         }
         Relationships: []
+      }
+      message_queue: {
+        Row: {
+          agent_id: string
+          attempts: number
+          conversation_id: string | null
+          created_at: string
+          from_agent_id: string | null
+          id: string
+          last_error: string | null
+          parent_message_id: string | null
+          payload: string
+          reply_channel: string
+          reply_chat_id: string | null
+          scheduled_for: string
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          attempts?: number
+          conversation_id?: string | null
+          created_at?: string
+          from_agent_id?: string | null
+          id?: string
+          last_error?: string | null
+          parent_message_id?: string | null
+          payload: string
+          reply_channel?: string
+          reply_chat_id?: string | null
+          scheduled_for?: string
+          source: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          attempts?: number
+          conversation_id?: string | null
+          created_at?: string
+          from_agent_id?: string | null
+          id?: string
+          last_error?: string | null
+          parent_message_id?: string | null
+          payload?: string
+          reply_channel?: string
+          reply_chat_id?: string | null
+          scheduled_for?: string
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_queue_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_queue_from_agent_id_fkey"
+            columns: ["from_agent_id"]
+            isOneToOne: false
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_queue_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "agent_messages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       roadmap_tasks: {
         Row: {
@@ -144,6 +343,32 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      telegram_bot_state: {
+        Row: {
+          agent_id: string
+          last_polled_at: string
+          update_offset: number
+        }
+        Insert: {
+          agent_id: string
+          last_polled_at?: string
+          update_offset?: number
+        }
+        Update: {
+          agent_id?: string
+          last_polled_at?: string
+          update_offset?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "telegram_bot_state_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "agents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
